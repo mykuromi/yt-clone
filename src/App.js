@@ -1,25 +1,68 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState } from "react";
+import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { Container } from "react-bootstrap";
+import Header from "./components/header/Header";
+import Sidebar from "./components/sidebar/Sidebar";
+import HomeScreen from "./screen/homeScreen/HomeScreen";
+import LoginScreen from "./screen/loginScreen/LoginScreen";
+import "./_app.scss";
+import { useSelector } from "react-redux";
+import WatchScreen from "./screen/watchScreen/WatchScreen";
+import SearchScreen from "./screen/SearchScreen";
+import SubscriptionsScreen from "./screen/subscriptionsScreen/SubscriptionsScreen";
+import ChannelScreen from "./screen/channelScreen/ChannelScreen";
 
-function App() {
+const Layout = ({ children }) => {
+  const [sidebar, toggleSidebar] = useState(false);
+  const handleToggleSidebar = () => toggleSidebar((value) => !value);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <Header handleToggleSidebar={handleToggleSidebar} />
+      <div className="app__container border border-info">
+        <Sidebar sidebar={sidebar} handleToggleSidebar={handleToggleSidebar} />
+        <Container fluid className="app__main">
+          {children}
+        </Container>
+      </div>
+    </>
   );
-}
+};
+
+const App = () => {
+  const { accessToken, loading } = useSelector((state) => state.auth);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading && !accessToken) {
+      navigate("/auth");
+    }
+  }, [accessToken, loading, navigate]);
+
+  return (
+    <Routes>
+      <Route path="/" exact element={<Layout children={<HomeScreen />} />} />
+      <Route path="/auth" element={<LoginScreen />} />
+      <Route
+        path="/search/:query"
+        element={<Layout children={<SearchScreen />} />}
+      />
+      <Route
+        path="/watch/:id"
+        element={<Layout children={<WatchScreen />} />}
+      />
+      <Route
+        path="/feed/subscriptions"
+        element={<Layout children={<SubscriptionsScreen />} />}
+      />
+      <Route
+        path="/channel/:channelId"
+        element={<Layout children={<ChannelScreen />} />}
+      />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+};
 
 export default App;
