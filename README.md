@@ -1,1 +1,1 @@
-Youtube clone coding project
+Cloning Youtube with React, Redux and Firebase
